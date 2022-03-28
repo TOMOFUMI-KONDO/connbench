@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/TOMOFUMI-KONDO/connbench/client"
@@ -14,6 +13,9 @@ import (
 var (
 	addr  string
 	times int
+
+	durations []time.Duration
+	idx       = 0
 )
 
 func init() {
@@ -23,37 +25,25 @@ func init() {
 }
 
 func main() {
+	durations = make([]time.Duration, times)
+
 	for i := 0; i < times; i++ {
 		startAt := time.Now()
-		fmt.Printf("StartAt: %s\n", startAt)
 
 		sess, err := quic.DialAddr(addr, client.GenTLSCfg(), nil)
 		if err != nil {
 			panic(err)
 		}
 
-		err = handleSess(sess, startAt)
+		stream, err := sess.OpenStreamSync(context.Background())
 		if err != nil {
 			panic(err)
 		}
-	}
-}
 
-func handleSess(sess quic.Session, startAt time.Time) error {
-	stream, err := sess.OpenStreamSync(context.Background())
-	if err != nil {
-		return err
-	}
-	defer stream.Close()
+		if err = client.HandleConn(stream, startAt, durations, &idx); err != nil {
+			panic(err)
+		}
 
-	if _, err := stream.Write(client.Int64ToBytes(startAt.UnixNano())); err != nil {
-		return err
+		time.Sleep(time.Second)
 	}
-
-	_, err = io.ReadAll(stream)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

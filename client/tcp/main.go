@@ -2,40 +2,45 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
 	"fmt"
 	"time"
 
 	"github.com/TOMOFUMI-KONDO/connbench/client"
 )
 
-const (
-	addr  = "localhost:44300"
-	times = 100
+var (
+	addr  string
+	times int
+
+	durations []time.Duration
+	idx       = 0
 )
 
+func init() {
+	flag.StringVar(&addr, "addr", "localhost:44300", "server address")
+	flag.IntVar(&times, "times", 100, "number of times to try connection establishment")
+	flag.Parse()
+}
+
 func main() {
+	durations = make([]time.Duration, times)
+
 	for i := 0; i < times; i++ {
 		startAt := time.Now()
-		fmt.Printf("StartAt: %s\n", startAt)
 
 		conn, err := tls.Dial("tcp", addr, client.GenTLSCfg())
 		if err != nil {
 			panic(err)
 		}
 
-		err = handleConn(conn, startAt)
-		if err != nil {
+		if err = client.HandleConn(conn, startAt, durations, &idx); err != nil {
 			panic(err)
 		}
-	}
-}
-
-func handleConn(conn *tls.Conn, startAt time.Time) error {
-	defer conn.Close()
-
-	if _, err := conn.Write(client.Int64ToBytes(startAt.UnixNano())); err != nil {
-		return err
+		time.Sleep(time.Second)
 	}
 
-	return nil
+	for _, d := range durations {
+		fmt.Println(d)
+	}
 }

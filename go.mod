@@ -7,6 +7,7 @@ require github.com/lucas-clemente/quic-go v0.26.0
 require (
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-echarts/go-echarts/v2 v2.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.1 // indirect

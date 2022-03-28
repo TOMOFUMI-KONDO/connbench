@@ -1,12 +1,17 @@
 package server
 
 import (
+	"bufio"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/binary"
 	"encoding/pem"
+	"io"
+	"log"
 	"math/big"
+	"time"
 
 	"github.com/TOMOFUMI-KONDO/connbench"
 )
@@ -35,4 +40,29 @@ func GenTLSCfg() *tls.Config {
 		Certificates: []tls.Certificate{tlsCert},
 		NextProtos:   []string{connbench.NextProto},
 	}
+}
+
+func HandleConn(conn io.ReadWriteCloser) {
+	defer conn.Close()
+
+	acceptedAt := time.Now()
+
+	rd := bufio.NewReader(conn)
+	str, err := rd.ReadString([]byte("\n")[0])
+	if err != nil {
+		panic(err)
+	}
+	if str[:3] != "GET" {
+		log.Fatalf("got unknown method '%s'\n", str)
+	}
+
+	if _, err := conn.Write(int64ToBytes(acceptedAt.UnixNano())); err != nil {
+		panic(err)
+	}
+}
+
+func int64ToBytes(n int64) []byte {
+	bytes := make([]byte, binary.MaxVarintLen64)
+	binary.PutVarint(bytes, n)
+	return bytes
 }
