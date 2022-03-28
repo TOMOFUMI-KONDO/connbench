@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io"
 	"time"
@@ -10,10 +11,16 @@ import (
 	"github.com/lucas-clemente/quic-go"
 )
 
-const (
-	addr  = "localhost:44300"
-	times = 100
+var (
+	addr  string
+	times int
 )
+
+func init() {
+	flag.StringVar(&addr, "addr", "localhost:44300", "server address")
+	flag.IntVar(&times, "times", 100, "number of times to try connection establishment")
+	flag.Parse()
+}
 
 func main() {
 	for i := 0; i < times; i++ {
