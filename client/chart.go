@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,8 +15,11 @@ import (
 func Render(durations []time.Duration, network string) error {
 	line := charts.NewLine()
 	line.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: fmt.Sprintf("Connection Establishment Time Benchmark for %s", strings.ToUpper(network))}),
-		charts.WithYAxisOpts(opts.YAxis{Name: "connection establishment time[μs]", Max: 15000}),
+		charts.WithTitleOpts(opts.Title{
+			Title:    fmt.Sprintf("Connection Establishment Time[μs] for %s", strings.ToUpper(network)),
+			Subtitle: fmt.Sprintf("Average: %s[μs]", strconv.FormatInt(average(durations), 10)),
+		}),
+		charts.WithYAxisOpts(opts.YAxis{Max: 18000, Type: "value"}),
 	)
 
 	lineItems := make([]opts.LineData, len(durations))
@@ -34,6 +38,14 @@ func Render(durations []time.Duration, network string) error {
 	}
 
 	return nil
+}
+
+func average(durations []time.Duration) int64 {
+	var sum int64 = 0
+	for _, d := range durations {
+		sum += d.Microseconds()
+	}
+	return sum / int64(len(durations))
 }
 
 func zeroToN(n int) []int {
