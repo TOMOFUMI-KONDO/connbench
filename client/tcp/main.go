@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/TOMOFUMI-KONDO/connbench/client"
@@ -37,10 +36,11 @@ func main() {
 		if err = client.HandleConn(conn, startAt, durations, &idx); err != nil {
 			panic(err)
 		}
+
 		time.Sleep(time.Second)
 	}
 
-	for _, d := range durations {
-		fmt.Println(d)
+	if err := client.Render(durations, "tcp"); err != nil {
+		panic(err)
 	}
 }

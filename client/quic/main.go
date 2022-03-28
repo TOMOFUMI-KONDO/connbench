@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/TOMOFUMI-KONDO/connbench/client"
@@ -45,5 +44,9 @@ func main() {
 		}
 
 		time.Sleep(time.Second)
+	}
+
+	if err := client.Render(durations, "quic"); err != nil {
+		panic(err)
 	}
 }
